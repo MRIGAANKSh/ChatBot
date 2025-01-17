@@ -1,12 +1,12 @@
 import os
 
 import streamlit as st
-
+from dotenv import load_dotenv
 import google.generativeai as gen_ai
 
 
 # Load environment variables
-
+load_dotenv()
 
 # Configure Streamlit page settings
 st.set_page_config(
@@ -15,7 +15,7 @@ st.set_page_config(
     layout="centered",  # Page layout option
 )
 
-GOOGLE_API_KEY = AIzaSyAzwPdTKRaHz_kv4DOcm4K9NVVESosSIEk
+GOOGLE_API_KEY = os.getenv("API")
 
 # Set up Google Gemini-Pro AI model
 gen_ai.configure(api_key=GOOGLE_API_KEY)
@@ -36,7 +36,7 @@ if "chat_session" not in st.session_state:
 
 
 # Display the chatbot's title on the page
-st.title("🤖💬 MAX -A ChatBot")
+st.title("🤖💬 MAX - A ChatBot")
 
 # Display the chat history
 for message in st.session_state.chat_session.history:
@@ -44,7 +44,7 @@ for message in st.session_state.chat_session.history:
         st.markdown(message.parts[0].text)
 
 # Input field for user's message
-user_prompt = st.chat_input("Ask Max")
+user_prompt = st.chat_input("Ask Gemini-Pro...")
 if user_prompt:
     # Add user's message to chat and display it
     st.chat_message("user").markdown(user_prompt)
