@@ -1,57 +1,60 @@
-import os
-
 import streamlit as st
-
-import google.generativeai as gen_ai
-
-
-# Load environment variables
-
+import google.generativeai as genai
 
 # Configure Streamlit page settings
 st.set_page_config(
     page_title="MAX CHATBOT",
-    page_icon=":robot_face:",  # Favicon emoji
-    layout="centered",  # Page layout option
+    page_icon="🤖",
+    layout="centered",
 )
 
-GOOGLE_API_KEY ="AIzaSyAzwPdTKRaHz_kv4DOcm4K9NVVESosSIEk"
+# Set your Google API Key
+GOOGLE_API_KEY = "AIzaSyDPunydE5plFzENEPjY63KO2rLmzBk14KM"  # Replace with your actual API key
 
-# Set up Google Gemini-Pro AI model
-gen_ai.configure(api_key=GOOGLE_API_KEY)
-model = gen_ai.GenerativeModel('gemini-pro')
+# Configure API Key
+try:
+    genai.configure(api_key=GOOGLE_API_KEY)
+except Exception as e:
+    st.error(f"Error configuring API key: {e}")
+    st.stop()
 
+# Load Gemini-Pro model
+try:
+    model = genai.GenerativeModel("gemini-1.5-pro")
+except Exception as e:
+    st.error(f"Failed to load model: {e}")
+    st.stop()
 
-# Function to translate roles between Gemini-Pro and Streamlit terminology
-def translate_role_for_streamlit(user_role):
-    if user_role == "model":
-        return "assistant"
-    else:
-        return user_role
+# Function to map roles for Streamlit chat format
+def translate_role(role):
+    return "assistant" if role == "model" else role
 
-
-# Initialize chat session in Streamlit if not already present
+# Initialize chat session
 if "chat_session" not in st.session_state:
-    st.session_state.chat_session = model.start_chat(history=[])
+    try:
+        st.session_state.chat_session = model.start_chat(history=[])
+    except Exception as e:
+        st.error(f"Error initializing chat session: {e}")
+        st.stop()
 
-
-# Display the chatbot's title on the page
+# Display chatbot title
 st.title("🤖💬 MAX - A ChatBot")
 
-# Display the chat history
+# Show chat history
 for message in st.session_state.chat_session.history:
-    with st.chat_message(translate_role_for_streamlit(message.role)):
+    with st.chat_message(translate_role(message.role)):
         st.markdown(message.parts[0].text)
 
-# Input field for user's message
+# Get user input
 user_prompt = st.chat_input("Ask Max...")
 if user_prompt:
-    # Add user's message to chat and display it
+    # Display user input in chat
     st.chat_message("user").markdown(user_prompt)
 
-    # Send user's message to Gemini-Pro and get the response
-    gemini_response = st.session_state.chat_session.send_message(user_prompt)
-
-    # Display Gemini-Pro's response
-    with st.chat_message("assistant"):
-        st.markdown(gemini_response.text)
+    # Get AI response
+    try:
+        gemini_response = st.session_state.chat_session.send_message(user_prompt)
+        with st.chat_message("assistant"):
+            st.markdown(gemini_response.text)
+    except Exception as e:
+        st.error(f"Error getting response: {e}")
